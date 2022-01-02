@@ -1,18 +1,26 @@
 <template>
-  <div ref="tuiImageEditor" style="width: 100%; height: 200%"></div>
+  <div ref="tuiImageEditor" style="width: 100%; height: 200%">
+    <canvas></canvas>
+  </div>
 </template>
 
 <script>
-import ImageEditor from "@robustar/image-editor"
-import "@robustar/image-editor/dist/tui-image-editor.css"
+import ImageEditor from '@robustar/image-editor';
+import '@robustar/image-editor/dist/tui-image-editor.css';
+import whiteTheme from './white-theme.js';
 
 const includeUIOptions = {
   includeUI: {
-    initMenu: 'filter',
+    initMenu: 'draw',
+    loadImage: {
+      path: '',
+      name: '',
+    },
+    theme: whiteTheme,
   },
 };
 const editorDefaultOptions = {
-  cssMaxWidth: 700,
+  cssMaxWidth: 1000,
   cssMaxHeight: 1000,
 };
 export default {
@@ -30,12 +38,7 @@ export default {
     },
   },
   mounted() {
-    let options = editorDefaultOptions;
-    if (this.includeUi) {
-      options = Object.assign(includeUIOptions, this.options);
-    }
-    this.editorInstance = new ImageEditor(this.$refs.tuiImageEditor, options);
-    this.addEventListener();
+    this.initInstance();
   },
   destroyed() {
     Object.keys(this.$listeners).forEach((eventName) => {
@@ -45,6 +48,18 @@ export default {
     this.editorInstance = null;
   },
   methods: {
+    initInstance() {
+      let options = editorDefaultOptions;
+      if (this.includeUi) {
+        options = Object.assign(includeUIOptions, this.options);
+      }
+      options.includeUI.loadImage = {
+        path: localStorage.getItem('image_url'),
+        name: localStorage.getItem('image_id'),
+      };
+      this.editorInstance = new ImageEditor(this.$refs.tuiImageEditor, options);
+      this.addEventListener();
+    },
     addEventListener() {
       Object.keys(this.$listeners).forEach((eventName) => {
         this.editorInstance.on(eventName, (...args) => this.$emit(eventName, ...args));
@@ -103,3 +118,13 @@ export default {
   },
 };
 </script>
+
+<style>
+.tui-image-editor-range-wrap .range {
+  color: black !important;
+}
+
+.tui-image-editor-range-wrap label {
+  color: black !important;
+}
+</style>

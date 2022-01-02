@@ -1,34 +1,42 @@
 import json
+
 from objects.RServer import RServer
+from objects.RResponse import RResponse
 from flask import jsonify, redirect, send_from_directory, send_file
 import os
-from os import path as osp
-from utils.image_utils import imageIdToPath
+import os.path as osp
+from utils.image_utils import imageURLToPath, getSplitLength
 
 server = RServer.getServer()
 app = server.getFlaskApp()
 
-@app.route('/train/<number>')
-def get_train_img(number):
-    url = imageIdToPath('train'+'/'+str(number))
-    return redirect('/dataset/'+url)
+@app.route('/image/<split>/<image_id>')
+def get_train_img(split, image_id):
+    try:
+        url = imageURLToPath('/'.join([split, image_id]))
+    except Exception as e:
+        print(e)
+        return RResponse.fail('Image with given id not exist')
+    return redirect('/dataset/' + url)
 
 
-@app.route('/test/<number>')
-def get_test_img(number):
-    url = imageIdToPath('test'+'/'+str(number))
-    return redirect('/dataset/'+url)
+@app.route('/image/<split>')
+def get_split_length(split):
+    return RResponse.ok(getSplitLength(split))
 
- # 根据图片路径返回图片
+
+# internal use only
 @app.route('/dataset/<path:datasetImgPath>')
 def get_dataset_img(datasetImgPath):
-    datasetImgPath = datasetImgPath.replace(
-        "_mistake", "").replace("_correct", "")
-    return send_file(osp.join('/', datasetImgPath))
+    return send_file(osp.join('/', datasetImgPath).replace('\\', '/'))
+
+@app.route('/visualize/<path:visualizeImgPath>')
+def get_influence_img(visualizeImgPath):
+    return send_file(osp.join('/', visualizeImgPath).replace('\\', '/'))
 
 
 # TODO: Need refactor
 @app.route('/dataset-info/<path:dataOriginId>')
 def get_image_file(dataOriginId):
-    return imageIdToPath(dataOriginId)
+    return imageURLToPath(dataOriginId)
 

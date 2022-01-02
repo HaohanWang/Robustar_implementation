@@ -22,6 +22,7 @@ class Trainer():
         self.name = name
         self.use_paired_train = use_paired_train
         self.paired_reg = paired_reg
+        self.stop = False
 
         # Start the tensorboard
 
@@ -136,7 +137,6 @@ class Trainer():
     def train(self, epoch, debug_info=True, save_best=True, pgd=False, merge=1):
         starttime = time.time()
         loader = self.trainloader
-        print("Start Training")
         criterion = torch.nn.CrossEntropyLoss()
         pgd_attack = PGD(self.net, eps=0.2, alpha=2/255,
                          iters=2) if pgd else self.returna
@@ -153,6 +153,13 @@ class Trainer():
             # storeLoader(loader)
             optimizer.zero_grad()
             for i, data in enumerate(loader, 0):
+
+                if self.stop:
+                    endtime = time.time()
+                    print("Time consumption:", endtime-starttime)
+                    print("Trainning stopped!")
+                    return 
+                    
 
                 if self.use_paired_train:
                     inputs, labels = data[0]

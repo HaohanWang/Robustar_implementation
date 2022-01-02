@@ -8,6 +8,7 @@ Modified By: Chonghan Chen (paulcccccch@gmail.com)
 
 from .RDataManager import RDataManager
 from flask import Flask
+import os.path as osp
 
 
 # Wrapper for flask server instance
@@ -16,21 +17,22 @@ class RServer:
     serverInstance = None
 
     # Use createServer method instead!
-    def __init__(self, configs, datasetPath):
+    def __init__(self, configs, baseDir, datasetDir):
     
         app = Flask(__name__)
         app.after_request(self.afterRequest)
 
-        self.datasetPath = datasetPath
+        self.datasetDir = datasetDir
+        self.baseDir = baseDir
+        self.datasetPath = datasetDir
         self.app = app
-        self.dataManager = RDataManager(datasetPath)
         self.configs = configs
         self.modelWrapper = None
 
     @staticmethod
-    def createServer(configs: dict, datasetPath: dict):
+    def createServer(configs: dict, baseDir: str, datasetDir: str):
         if RServer.serverInstance is None:
-            RServer.serverInstance = RServer(configs, datasetPath)
+            RServer.serverInstance = RServer(configs, baseDir, datasetDir)
         else:
             assert configs == RServer.serverInstance.configs, \
             'Attempting to recreate an existing server with different configs'
@@ -45,6 +47,10 @@ class RServer:
     @staticmethod
     def getDataManager():
         return RServer.serverInstance.dataManager
+
+    @staticmethod
+    def setDataManager(dataManager):
+        RServer.serverInstance.dataManager = dataManager
 
     @staticmethod
     def getServerConfigs():

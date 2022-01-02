@@ -1,129 +1,179 @@
 <template>
-  <div id="imageList">
+  <div class="d-flex flex-column align-center">
     <!-- Page header-->
-    <div>
-      <h5>Select the training image to edit.</h5>
+    <div class="text-h5 text-center font-weight-medium mb-4 mt-8">
+      Select the image to edit
     </div>
 
-    <!-- Image list -->
-    <div class="col-md-12">
-      <!-- Image list controller -->
-      <div class="row">
-        <!-- Previous page button -->
-        <div class="col-xl-4 col-lg-4 text-lg-center mt-xl-4">
-          <button class="btn btn-primary mb-xl-0" @click="prevPage()">
-            Prev Page
-          </button>
-        </div>
+    <!-- Image list controller -->
+    <div class="d-flex justify-space-between px-16 py-8" style="width: 60%">
+      <!-- Previous page button -->
+      <v-btn depressed color="primary" @click="prevPage"> Prev Page </v-btn>
 
-        <!-- Refresh page button & page number -->
-        <div class="col-xl-4 col-lg-4 text-lg-center mt-xl-4">
-          <div class="btn-list mb-xl-0">
-            <button
-              @click="gotoPage()"
-              class="btn btn-primary mb-xl-0 refresh-page"
-            >
-              Goto Page
-              <input v-model="currentPage" class="page-number" />
-            </button>
-          </div>
-        </div>
-
-        <!-- Next page button -->
-        <div
-          class="col-xl-4 col-lg-4 text-lg-center mt-xl-4"
-          @click="nextPage()"
-        >
-          <div class="btn-list mb-xl-0">
-            <a class="btn btn-primary mb-xl-0">Next Page</a>
-          </div>
-        </div>
+      <!-- Refresh page button & page number -->
+      <div class="d-flex">
+        <v-btn class="mr-4" depressed color="primary" @click="gotoPage"> Goto Page </v-btn>
+        <v-text-field v-model="currentPage" dense label="Page Number"></v-text-field>
       </div>
+
+      <!-- Next page button -->
+      <v-btn v-if="isListEnd" depressed disabled color="primary" @click="nextPage"> Next Page </v-btn>
+      <v-btn v-else depressed color="primary" @click="nextPage"> Next Page </v-btn>
     </div>
 
     <!-- Image List -->
-    <div class="row train-img-list" v-for="(imgline, row) in imgmat" :key="row">
-      <div
-        class="card-body col-xl-2 col-sm-4"
-        v-for="(url, col) in imgline"
-        :key="col"
-      >
-        <div class="row mb-1">
+    <div v-for="(imgline, row) in imageMatrix" :key="row">
+      <div class="d-flex">
+        <div class="mb-8 mr-8 row-item" v-for="(url, col) in imgline" :key="col">
           <!-- minus 1 is necessary since Vue counts from 1 -->
-          <img :src="url" alt="img" class="w-95" />
+          <!-- <img :src="url" alt="img" class="w-95" @click="editImage(row, col, url)" /> -->
+          <v-hover v-slot="{ hover }">
+            <v-img :src="url" alt="invalid image URL" height="200px" width="200px" @error="onListEnd">
+              <template v-slot:placeholder>
+                <v-row class="fill-height ma-0" align="center" justify="center">
+                  <v-progress-circular
+                    v-if="!isListEnd"
+                    indeterminate
+                    color="primary lighten-3"
+                  ></v-progress-circular>
+                </v-row>
+              </template>
+              <v-expand-transition>
+                <div
+                  v-if="hover"
+                  class="d-flex flex-column transition-fast-in-fast-out primary v-card--reveal text-h5 white--text"
+                  style="height: 100%"
+                >
+                  <v-btn
+                    class="mb-4"
+                    outlined
+                    large
+                    color="white"
+                    width="150px"
+                    @click="gotoImage(row, col, url, 'EditImage')"
+                  >
+                    <v-icon left>mdi-pencil</v-icon>
+                    Annotate
+                  </v-btn>
+                  <v-btn
+                    outlined
+                    large
+                    color="white"
+                    width="150px"
+                    @click="gotoImage(row, col, url, 'Prediction')"
+                  >
+                    <v-icon left>mdi-cogs</v-icon>
+                    Predict
+                  </v-btn>
+                </div>
+              </v-expand-transition>
+            </v-img>
+          </v-hover>
         </div>
       </div>
+    </div>
+
+    <div v-if="imageMatrix.length === 0" class="d-flex text-h2 grey--text mt-16 pt-16">
+      Sorry, image list is empty
     </div>
   </div>
 </template>
 
 <script>
-import { configs } from "@/configs.js";
-import { imagePageIdx2Id, imageCoord2Idx } from "@/utils/image_list";
+import { configs } from '@/configs.js';
+import { imagePageIdx2Id, imageCoord2Idx, getPageNumber } from '@/utils/image_list';
+import { APIGetSplitLength } from '@/apis/images'
 
 export default {
-  name: "ImageList",
+  name: 'ImageList',
   components: {},
   data() {
     return {
       currentPage: 0,
-      imgmat: [],
+      imageMatrix: [],
       configs: configs,
+      isListEnd: false,
+      splitLength: 1000
     };
   },
   mounted() {
+    this.getMaxPage();
     this.loadImages();
   },
   watch: {
-    $route () {
+    $route() {
       this.currentPage = 0;
-      this.loadImages()
-    }
+      this.getMaxPage();
+      this.loadImages();
+    },
   },
   methods: {
+    getMaxPage() {
+      APIGetSplitLength(this.$route.params.split,
+        (res) => {this.splitLength = res.data.data; console.log(res.data.data)},
+        (err) => console.log(err)
+      )
+    }, 
     nextPage() {
-      this.currentPage = parseInt(this.currentPage) + 1;
+      this.currentPage++;
       this.loadImages();
     },
     prevPage() {
-      this.currentPage = Math.max(this.currentPage - 1, 0);
+      if (this.currentPage <= 0) {
+        return;
+      }
+      this.currentPage--;
       this.loadImages();
+    },
+    gotoImage(row, col, url, componentName) {
+      const idx = imageCoord2Idx(row, col);
+      const image_id = imagePageIdx2Id(this.currentPage, idx);
+      localStorage.setItem('split', this.$route.params.split);
+      localStorage.setItem('image_id', image_id);
+      localStorage.setItem('image_url', url);
+      this.$router.push({ name: componentName });
+    },
+    calcMaxPage() {
+      return getPageNumber(Math.max(this.splitLength - 1, 0));
     },
     gotoPage() {
+      this.currentPage = Math.min(this.calcMaxPage(), this.currentPage);
+      console.log(this.currentPage)
       this.loadImages();
     },
-    imageClicked(index) {
-      let image_id = imagePageIdx2Id(this.currentPage, index);
-      this.$router.push({ path: `edit?id=${image_id}` });
-    },
-    getImageUrl(row, col) {
-      let x = this.imgarr[imageCoord2Idx(row, col)];
-      console.log(row, col, x);
-    },
     loadImages() {
-      this.imgmat = [];
+      this.isListEnd = false;
+      this.imageMatrix = [];
       for (let row = 0; row < configs.imageListRow; row++) {
         let line = [];
         for (let col = 0; col < configs.imageListCol; col++) {
-          let idx = imageCoord2Idx(row, col);
-          let imgid = imagePageIdx2Id(this.currentPage, idx);
+          const idx = imageCoord2Idx(row, col);
+          const imgid = imagePageIdx2Id(this.currentPage, idx);
           // TODO: '/train/' should be a component prop, not hard-coded
-          line.push(`${configs.serverUrl}/${this.$route.params.phase}/${imgid}`);
+          line.push(`${configs.imageServerUrl}/${this.$route.params.split}/${imgid}`);
         }
-        this.imgmat.push(line);
+        this.imageMatrix.push(line);
       }
-      console.log(this.imgmat);
     },
+    onListEnd() {
+      this.isListEnd = true;
+      this.$root.alert('error', 'This is the end of the list.');
+    }
   },
 };
 </script>
 
 <style scoped>
-img {
-  cursor: pointer;
+.row-item:last-child {
+  margin-right: 0 !important;
 }
 
-#imageList {
-  text-align: center;
+.v-card--reveal {
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  opacity: 0.8;
 }
 </style>
