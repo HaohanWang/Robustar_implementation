@@ -62,6 +62,11 @@ const COLORPICKER_INSTANCE_NAMES = ['filterBlendColor', 'filterMultiplyColor', '
  * @class
  * @ignore
  */
+
+// class Filter{
+
+// }
+
 class Filter extends Submenu {
   constructor(subMenuElement, { locale, menuBarPosition, usageStatistics }) {
     super(subMenuElement, {

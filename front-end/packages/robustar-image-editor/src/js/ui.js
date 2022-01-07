@@ -15,6 +15,7 @@ import Resize from '@/ui/resize';
 import Draw from '@/ui/draw';
 import History from '@/ui/history';
 import Locale from '@/ui/locale/locale';
+import Filter from '@/ui/filter';
 
 /* A full list of components
 import Shape from '@/ui/shape';
@@ -43,6 +44,7 @@ const SUB_UI_COMPONENT = {
 const SUB_UI_COMPONENT = {
   Resize,
   Draw,
+  Filter,
 };
 
 const { CustomEvents } = snippet;
@@ -267,7 +269,7 @@ class Ui {
           // 'icon',
           // 'text',
           // 'mask',
-          // 'filter',
+          'filter',
         ],
         initMenu: '',
         uiSize: {

@@ -3,56 +3,7 @@
  * @returns {string}
  */
 export default ({ locale }) => `
-    <ul class="tui-image-editor-submenu-item">
-        <li class="tui-image-editor-submenu-align">
-            <div class="tui-image-editor-checkbox-wrap fixed-width">
-                <div class="tui-image-editor-checkbox">
-                    <label>
-                        <input type="checkbox" class="tie-grayscale">
-                        <span>${locale.localize('Grayscale')}</span>
-                    </label>
-                </div>
-                <div class="tui-image-editor-checkbox">
-                    <label>
-                        <input type="checkbox" class="tie-invert">
-                        <span>${locale.localize('Invert')}</span>
-                    </label>
-                </div>
-                <div class="tui-image-editor-checkbox">
-                    <label>
-                        <input type="checkbox" class="tie-sepia">
-                        <span>${locale.localize('Sepia')}</span>
-                    </label>
-                </div>
-                <div class="tui-image-editor-checkbox">
-                    <label>
-                        <input type="checkbox" class="tie-vintage">
-                        <span>${locale.localize('Sepia2')}</span>
-                    </label>
-                </div>
-                <div class="tui-image-editor-checkbox">
-                    <label>
-                        <input type="checkbox" class="tie-blur">
-                        <span>${locale.localize('Blur')}</span>
-                    </label>
-                </div>
-                <div class="tui-image-editor-checkbox">
-                    <label>
-                        <input type="checkbox" class="tie-sharpen">
-                        <span>${locale.localize('Sharpen')}</span>
-                    </label>
-                </div>
-                <div class="tui-image-editor-checkbox">
-                    <label>
-                        <input type="checkbox" class="tie-emboss">
-                        <span>${locale.localize('Emboss')}</span>
-                    </label>
-                </div>
-            </div>
-        </li>
-        <li class="tui-image-editor-partition">
-            <div></div>
-        </li>
+    <div class="tui-image-editor-submenu-item">
         <li class="tui-image-editor-submenu-align">
             <div class="tui-image-editor-checkbox-group tui-image-editor-disabled" style="margin-bottom: 7px;">
                 <div class="tui-image-editor-checkbox-wrap">
@@ -153,5 +104,5 @@ export default ({ locale }) => `
                 </div>
             </div>
         </li>
-    </ul>
+    </div>
 `;
