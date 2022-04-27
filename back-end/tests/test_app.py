@@ -232,5 +232,3 @@ class TestPredict:
                            "/Robustar2/visualize_images/train_1_2.png",
                            "/Robustar2/visualize_images/train_1_3.png"]
 
-# TODO: annotate 图片 逐像素位的检查
-# TODO: test training
