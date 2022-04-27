@@ -29,8 +29,8 @@ class Test1:
             #                      std=(0.5, 0.5, 0.5))
         ])
 
-        mixture_methods = ['pure_black', 'noise', 'noise_weak', 'noise_minor', 'random_pure',
-                           'hstrips', 'vstrips']
+        mixture_methods = ['mixture', 'pure_black', 'noise', 'noise_weak', 'noise_minor',
+                           'random_pure', 'hstrips', 'vstrips']
 
         for method in mixture_methods:
             train_set = PairedDataset('/Robustar2/dataset/train', '/Robustar2/dataset/paired', 32,
@@ -47,8 +47,8 @@ class Test1:
                     img = np.swapaxes(img, 0, 1)
                     img = np.swapaxes(img, 1, 2)
                     # print(img)
-                    # plt.imshow(img.numpy())
-                    # plt.show()
+                    plt.imshow(img.numpy())
+                    plt.show()
                 else:
                     break
 
@@ -56,12 +56,16 @@ class Test1:
 
     def _test_image(self, img_data, mixture_method):
         if mixture_method == 'pure_black':
-            bool_arr = (img_data == np.full((1,3), 0))
+            bool_arr = (img_data == np.full((1, 3), 0))
             result = np.all(bool_arr)
             return result
         elif mixture_method == 'random_pure':
             bool_arr = (img_data == img_data[0][0])
             result = np.all(bool_arr)
             return result
+
+        # TODO: other mexture methods
+
+        # TODO: other test cases
 
         return True

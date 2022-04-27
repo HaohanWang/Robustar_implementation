@@ -129,7 +129,7 @@ class PairedDataset(DataSet):
         imgarr[user_edit == 1] = 0 # the area marked by the user is the background and should be cleared
 
         if self.mode == 'mixture':
-            mode_idx = np.random.randint(len(self.MIXTURE_METHODS))
+            mode_idx = np.random.randint(len(self.mixture_methods))
             mode = self.mixture_methods[mode_idx]
         else:
             mode = self.mode

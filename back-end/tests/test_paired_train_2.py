@@ -125,6 +125,7 @@ class Test2:
                       'device': 'cpu', 'pre_trained': False, 'batch_size': 16, 'shuffle': True,
                       'num_workers': 8, 'image_size': 32, 'image_padding': 'none', 'num_classes': 9}
 
-        # RTask.exit_tasks_of_type(TaskType.Training) # TODO : not working
+
+        RTask.exit_tasks_of_type(TaskType.Training) # TODO : not working
 
         app.config['TESTING'] = False
