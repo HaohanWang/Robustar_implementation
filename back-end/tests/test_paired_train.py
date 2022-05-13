@@ -13,8 +13,9 @@ import pytest
 
 
 class Test1:
-    def test_train_paired_train_data_success(self):
+    def test_train_paired_train_pixel_filling_success(self):
         # manually creates the the first paired image which is filled with (255,255,255)
+        # TODO: hard-coding
         paired_img_path = "/Robustar2/dataset/paired/bird/0.JPEG"
         encoded_string = "iVBORw0KGgoAAAANSUhEUgAAAOAAAADgCAYAAAAaLWrhAAAAAXNSR0IArs4c6QAABQxJREFUeF7t08EJADAMA7F2/6Fd6BL3URYwiNzdtuMIEEgErgATd6MEvoAAPQKBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimyYgQD9AIBQQYIhvmoAA/QCBUECAIb5pAgL0AwRCAQGG+KYJCNAPEAgFBBjimybwAPj3fY6Bc5rWAAAAAElFTkSuQmCC"
         decoded = base64.b64decode(encoded_string)
@@ -28,7 +29,6 @@ class Test1:
             # transforms.Normalize(mean=(0.5, 0.5, 0.5),
             #                      std=(0.5, 0.5, 0.5))
         ])
-
         mixture_methods = ['mixture', 'pure_black', 'noise', 'noise_weak', 'noise_minor',
                            'random_pure', 'hstrips', 'vstrips']
 
@@ -37,7 +37,6 @@ class Test1:
                                       transform, None, method, False)
             data_loader = torch.utils.data.DataLoader(train_set, batch_size=1, shuffle=False,
                                                       num_workers=1)
-
             img = 0
             for idx, data in enumerate(data_loader):
                 if idx in [0]:
@@ -54,6 +53,8 @@ class Test1:
 
             assert self._test_image(np.array(img), method)
 
+            # TODO: reload the information from the original image?
+
     def _test_image(self, img_data, mixture_method):
         if mixture_method == 'pure_black':
             bool_arr = (img_data == np.full((1, 3), 0))
@@ -64,8 +65,6 @@ class Test1:
             result = np.all(bool_arr)
             return result
 
-        # TODO: other mexture methods
-
-        # TODO: other test cases
+        # TODO: other mixture methods
 
         return True

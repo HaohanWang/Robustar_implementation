@@ -1,7 +1,11 @@
 import json
+import time
 
 import pytest
+import torch
+from torchvision import transforms
 
+from ml import PairedDataset
 from objects.RServer import RServer
 from objects.RTask import RTask, TaskType
 from server import start_server
@@ -86,38 +90,39 @@ class Test2:
         }
         app.config['TESTING'] = False
 
-    def test_train_paired_train_data_success(self, server):
+    def test_train_paired_train_annotated_success(self, server):
         app = server.getFlaskApp()
         app.config['TESTING'] = True
         client = app.test_client()
 
-        data = {"configs": {
-            "weight_to_load": "resnet-18.pth",
-            "model_arch": "resnet-18-32x32",
-            "device": "cpu",
-            "pre_trained": False,
-            "batch_size": 16,
-            "shuffle": True,
-            "num_workers": 8,
-            "image_size": 32,
-            "image_padding": "none",
-            "num_classes": 9,
-            "learn_rate": 0.1,
-            "thread": 8,
-            "save_dir": "/Robustar2/checkpoints",
-            'use_paired_train': 'yes',
-            'paired_data_path': '/Robustar2/dataset/paired',
-            'paired_train_reg_coeff': 0.001,
-            'mixture': 'random_pure',
-            'class_path': './model/cifar-class.txt',
-            'train_path': '/Robustar2/dataset/train',
-            'test_path': '/Robustar2/dataset/test',
-            'paired_data_path': '/Robustar2/dataset/paired',
-            'user_edit_buffering': False,
-            'epoch': 8,
-            'auto_save_model': 'yes'
-        }
-        }
+        data = {'info': 'placeholder',
+                "configs": {
+                    "weight_to_load": "resnet-18.pth",
+                    "model_arch": "resnet-18-32x32",
+                    "device": "cpu",
+                    "pre_trained": False,
+                    "batch_size": 16,
+                    "shuffle": True,
+                    "num_workers": 8,
+                    "image_size": 32,
+                    "image_padding": "none",
+                    "num_classes": 9,
+                    "learn_rate": 0.1,
+                    "thread": 8,
+                    "save_dir": "/Robustar2/checkpoints",
+                    'use_paired_train': 'yes',
+                    'paired_data_path': '/Robustar2/dataset/paired',
+                    'paired_train_reg_coeff': 0.001,
+                    'mixture': 'random_pure',
+                    'class_path': './model/cifar-class.txt',
+                    'train_path': '/Robustar2/dataset/train',
+                    'test_path': '/Robustar2/dataset/test',
+                    'paired_data_path': '/Robustar2/dataset/paired',
+                    'user_edit_buffering': False,
+                    'epoch': 8,
+                    'auto_save_model': 'yes'
+                }
+                }
         rv = client.post("/train", json=json.loads(json.dumps(data))).get_json()
         assert rv['code'] == 0
         sc = server.getServerConfigs()
@@ -125,7 +130,32 @@ class Test2:
                       'device': 'cpu', 'pre_trained': False, 'batch_size': 16, 'shuffle': True,
                       'num_workers': 8, 'image_size': 32, 'image_padding': 'none', 'num_classes': 9}
 
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            # transforms.Normalize(mean=(0.5, 0.5, 0.5),
+            #                      std=(0.5, 0.5, 0.5))
+        ])
+        data_loader = torch.utils.data.DataLoader(server.getDataManager().trainset, batch_size=1,
+                                                  shuffle=False, num_workers=1)
+        img = 0
+        for idx, data in enumerate(data_loader):
+            if idx in [0]:
+                img_train = data[0][0].squeeze(0).permute(1, 2, 0).numpy()  # train image
+                img_paired = data[1][0].squeeze(0).permute(1, 2, 0).numpy()  # paired image
+                img = transform(img)
+                img = np.swapaxes(img, 0, 1)
+                img = np.swapaxes(img, 1, 2)
+                # print(img)
+                plt.imshow(img.numpy())
+                plt.show()
+            else:
+                break
 
-        RTask.exit_tasks_of_type(TaskType.Training) # TODO : not working
+        time.sleep(25)
+
+        rv = client.get("train/stop").get_json()
+        assert rv['code'] == 0
+        assert rv['msg'] == "Success"
+        assert rv['data'] == "Training stopped!"
 
         app.config['TESTING'] = False
