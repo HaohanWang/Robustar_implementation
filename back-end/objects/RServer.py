@@ -33,6 +33,8 @@ class RServer:
         self.configs = configs
         self.modelWrapper = None
         self.modelsWeights = {}
+        self.initAcc = 0
+        self.trainedAcc = 0
 
     @staticmethod
     def createServer(configs: dict, baseDir: str, datasetDir: str, ckptDir: str):
@@ -84,6 +86,22 @@ class RServer:
     @staticmethod
     def addModelWeight(name, weight):
         RServer.serverInstance.modelsWeights[name] = weight
+
+    @staticmethod
+    def getInitAcc():
+        return RServer.serverInstance.initAcc
+
+    @staticmethod
+    def setInitAcc(initAcc):
+        RServer.serverInstance.initAcc = initAcc
+
+    @staticmethod
+    def getTrainedAcc():
+        return RServer.serverInstance.trainedAcc
+
+    @staticmethod
+    def setTrainedAcc(trainedAcc):
+        RServer.serverInstance.trainedAcc = trainedAcc
 
     @staticmethod
     def getSocket():
