@@ -253,8 +253,8 @@ class TestTrain:
             'configs': {
                             'model_name': 'my-test-model',
                             'weight': '',
-                            'train_path': '/Robustar2/dataset/train-2',
-                            'test_path': '/Robustar2/dataset/test-2',
+                            'train_path': '/Robustar2/dataset/train-10',
+                            'test_path': '/Robustar2/dataset/test-10',
                             'class_path': './model/cifar-class.txt',
                             'port': '8000',
                             'save_dir': '/Robustar2/checkpoints',
@@ -262,14 +262,14 @@ class TestTrain:
                             'mixture': 'random_pure',
                             'paired_data_path': '/Robustar2/dataset/paired',
                             'auto_save_model': True,
-                            'batch_size': '128',
+                            'batch_size': '27',
                             'shuffle': True,
-                            'learn_rate': 0.1,
+                            'learn_rate': 0.003,
                             'pgd': 'no PGD',
                             'paired_train_reg_coeff': 0.001,
                             'image_size': 32,
-                            'epoch': 2,
-                            'thread': 8,
+                            'epoch': 5,
+                            'thread': 4,
                             'pretrain': False,
                             'user_edit_buffering': False,
                             'save_every': 1
@@ -304,9 +304,10 @@ class TestTrain:
                 assert torch.equal(key_item_1[1], key_item_2[1])
 
 
-
     # Test whether training works correctly
     def test_train_model(self, client, server):
+        assert server.getInitAcc() == 0
+        assert server.getTrainedAcc() == 0
 
         # Test non-paired training
         data = {
@@ -314,8 +315,8 @@ class TestTrain:
             'configs': {
                 'model_name': 'test-regular-training',
                 'weight': '',
-                'train_path': '/Robustar2/dataset/train-2',
-                'test_path': '/Robustar2/dataset/test-2',
+                'train_path': '/Robustar2/dataset/train-10',
+                'test_path': '/Robustar2/dataset/test-10',
                 'class_path': './model/cifar-class.txt',
                 'port': '8000',
                 'save_dir': '/Robustar2/checkpoints',
@@ -323,14 +324,14 @@ class TestTrain:
                 'mixture': 'random_pure',
                 'paired_data_path': '/Robustar2/dataset/paired',
                 'auto_save_model': True,
-                'batch_size': '128',
+                'batch_size': '27',
                 'shuffle': True,
-                'learn_rate': 0.1,
+                'learn_rate': 0.003,
                 'pgd': 'no PGD',
                 'paired_train_reg_coeff': 0.001,
                 'image_size': 32,
-                'epoch': 2,
-                'thread': 8,
+                'epoch': 5,
+                'thread': 4,
                 'pretrain': False,
                 'user_edit_buffering': False,
                 'save_every': 1
@@ -344,3 +345,6 @@ class TestTrain:
 
         # Wait for the training
         time.sleep(30)
+
+        # Check the improvement of accuracy
+        assert server.getTrainedAcc() > server.getInitAcc()

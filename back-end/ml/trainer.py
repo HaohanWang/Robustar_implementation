@@ -149,7 +149,14 @@ class Trainer():
     def returna(self, a, b):
         return a
 
+    # def setup_seed(self, seed):
+    #     torch.manual_seed(seed)
+    #     torch.cuda.manual_seed_all(seed)
+    #     torch.backends.cudnn.deterministic = True
+
     def train(self, epoch, auto_save=True, pgd=False, merge=1):
+        # self.setup_seed(20)
+
         starttime = time.time()
         loader = self.trainloader
         criterion = torch.nn.CrossEntropyLoss()
@@ -157,7 +164,13 @@ class Trainer():
                          iters=2) if pgd else self.returna
         optimizer = torch.optim.SGD(self.net.parameters(
         ), lr=self.learn_rate, momentum=0.9, weight_decay=5e-4)
+
+        # Record the best accuracy over testset
         best = 0
+
+        # Record the best accuracy over trainset
+        # Used for testing only
+        best_train = 0
 
         # init task
         task = RTask(TaskType.Training, epoch*len(loader))
@@ -247,8 +260,19 @@ class Trainer():
                 if auto_save:
                     self.save_net_best()
                 best = current_acc
+
             if (epoch + 1) % self.save_every == 0:
                 self.save_net_epoch(epoch)
+
+            # Used for testing
+            if (epoch == 0):
+                RServer.setInitAcc(info_train_acc.item())
+
+            # Used for testing only
+            if (info_train_acc > best_train):
+                best_train = info_train_acc
+
+        RServer.setTrainedAcc(best_train.item())
 
         endtime = time.time()
         print("Time consumption:", endtime-starttime)
