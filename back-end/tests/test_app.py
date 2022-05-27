@@ -306,9 +306,6 @@ class TestTrain:
 
     # Test whether training works correctly
     def test_train_model(self, client, server):
-        assert server.getInitAcc() == 0
-        assert server.getTrainedAcc() == 0
-
         # Test non-paired training
         data = {
             'info': 'placeholder',
@@ -385,9 +382,6 @@ class TestTrain:
 
         # Wait for the training
         time.sleep(30)
-
-        print(server.getInitAcc())
-        print(server.getTrainedAcc())
 
         # Check the improvement of accuracy
         assert server.getTrainedAcc() > server.getInitAcc()
