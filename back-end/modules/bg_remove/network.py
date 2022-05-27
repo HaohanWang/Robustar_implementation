@@ -51,7 +51,7 @@ class U2NET:
             print("Loading a U2NETp model (4 mb) with lower quality but fast processing.")
             net = self.U2NETP_DEEP()
         else:
-            raise NotImplemented("Unknown u2net model!")
+            raise NotImplementedError("Unknown u2net model!")
 
         try:
             if device == 'cpu':
@@ -95,10 +95,8 @@ class U2NET:
         """
         start_time = time.time()  # Time counter
         image = image.type(self.torch.FloatTensor)
-        if self.torch.cuda.is_available():
-            image = self.Variable(image.cuda())
-        else:
-            image = self.Variable(image)
+        image = self.Variable(image.to(self.device))
+
         mask, d2, d3, d4, d5, d6, d7 = self.__net__(image)  # Predict mask
         print("Mask prediction completed")
         # Normalization
@@ -130,6 +128,8 @@ class U2NET:
             try:
                 # TODO: use existing library instead!
                 pil_image = Image.open(data)  # Load image if there is a path 
+                if pil_image.mode != 'RGB':
+                    pil_image = pil_image.convert('RGB')
             except IOError:
                 print('Cannot retrieve image. Please check file: ' + data)
                 return False, False

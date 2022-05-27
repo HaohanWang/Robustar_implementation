@@ -1,11 +1,13 @@
 import pytest
 
+from objects.RModelWrapper import RModelWrapper
 from objects.RServer import RServer
 from server import start_server
 
 import os
 import os.path as osp
-
+import torch
+import time
 
 # start_server()
 # def test_valid_app_and_server():
@@ -26,6 +28,10 @@ def app():
     yield app
     app.config['TESTING'] = False
 
+@pytest.fixture()
+def server():
+    server = RServer.getServer()
+    return server
 
 def _cleanup():
     base_dir = osp.join('/', 'Robustar2').replace('\\', '/')
